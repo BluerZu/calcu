@@ -250,7 +250,6 @@ _dot.addEventListener('click', function(){
 let _operands = document.querySelectorAll('.operand');
 _operands.forEach(function(c){
 	c.addEventListener('click', function(){
-		
 		if (solutionDisplay.value==0) {
 			solutionDisplay.value = " " + currentDisplay.value + " " + c.value + " ";
 		} else {
@@ -289,6 +288,11 @@ _sqroot.addEventListener('click', ()=>{
 	if(aValue == '' || aValue == 0){
 		var textErrorMessage = document.getElementById('error-text');
         textErrorMessage.textContent = 'Error:  No se puede obtener la raíz de 0.';
+        errorMessage.style.display = 'block';
+		currentDisplay.value = 0;
+	}else if(aValue < 0){
+		var textErrorMessage = document.getElementById('error-text');
+        textErrorMessage.textContent = 'Error:  No se puede obtener la raíz de un número negativo.';
         errorMessage.style.display = 'block';
 		currentDisplay.value = 0;
 	} else {
@@ -355,10 +359,26 @@ _clearBtn[2].addEventListener('click', function(){
 //evaluate
 let _evalBtn = document.querySelectorAll('.equals');
 _evalBtn[0].addEventListener('click', function(){
-	if (currentDisplay.value!='0' && solutionDisplay.value!='') {
+	const temp = solutionDisplay.value.trim() + currentDisplay.value.trim();
+	if (temp.includes('÷0')){
+		var textErrorMessage = document.getElementById('error-text');
+        textErrorMessage.textContent = 'Error:  No se puede dividir para cero.';
+        errorMessage.style.display = 'block';
+		currentDisplay.value = 0;
+	} else if (temp.includes('-0')){
+		solutionDisplay.value += currentDisplay.value;
+		evalAndReturn(solutionDisplay.value);
+	} else if (temp.includes('+0')){
+		solutionDisplay.value += currentDisplay.value;
+		evalAndReturn(solutionDisplay.value);
+	} else if (temp.includes('×0')){
+		solutionDisplay.value += currentDisplay.value;
+		evalAndReturn(solutionDisplay.value);
+	} else if (currentDisplay.value!='0' && solutionDisplay.value!='') {
 		solutionDisplay.value += currentDisplay.value;
 		evalAndReturn(solutionDisplay.value);
 	}
+
 	// helper to prevent a bug which a number is click after this action
 	solutionDisplay.value = null;
 });
@@ -397,6 +417,7 @@ let addInputValue = function (cval) {
 
 let sanitizeStep = function(t) {
 	let _work = t;
+
 	_work = _work.substring(0, (_work.length - 2));
 	return _work;
 }
@@ -421,20 +442,27 @@ let evalAndReturn = function (cvl) {
 		workShow = workShow.split('×').join('*');
 	} 
 
-	if(checkTimes!=null) {
+	if(checkDiv!=null) {
 		workShow = workShow.split('÷').join('/');
 	}
-
+	if (workShow.includes('/  0')) {
+        var textErrorMessage = document.getElementById('error-text');
+        textErrorMessage.textContent = 'Error: No se puede dividir por cero.';
+        errorMessage.style.display = 'block';
+        currentDisplay.value = 0;
+        return 0;
+    }	
+	
 	let answerDerived = eval(workShow);
 
-	/* fixed to 5dps in the display area */
 	if (String(answerDerived).indexOf('.') > 0) {
 		currentDisplay.value = answerDerived.toFixed(5);
 	} else {
 		currentDisplay.value = answerDerived;
 	}
-	/* not fixed dps in the history area */
-	if (cvl.trim().length > 4) {
+	console.log("Length:" + cvl.trim().length);
+	console.log("cvl:"+cvl.trim());
+	if (cvl.trim().length > 3) {
 		createHistoryPill({
 			solution : cvl,
 			answer : answerDerived
