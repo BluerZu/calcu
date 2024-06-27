@@ -460,9 +460,8 @@ let evalAndReturn = function (cvl) {
 	} else {
 		currentDisplay.value = answerDerived;
 	}
-	console.log("Length:" + cvl.trim().length);
-	console.log("cvl:"+cvl.trim());
-	if (cvl.trim().length > 3) {
+
+	if (cvl.trim().length > 4) {
 		createHistoryPill({
 			solution : cvl,
 			answer : answerDerived
